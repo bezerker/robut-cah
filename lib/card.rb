@@ -1,4 +1,4 @@
-class Card
+class Robut::Plugin::Cah::Card
   attr_accessor :id, :phrase
 
   def initialize(params)

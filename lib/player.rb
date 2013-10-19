@@ -1,4 +1,4 @@
-class Player
+class Robut::Plugin::Cah::Player
   attr_accessor :username, :cards, :won_cards
 
   def initialize(params)

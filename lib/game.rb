@@ -1,4 +1,4 @@
-class Robut::Cah::Game
+class Robut::Plugin::Cah::Game
   CARDS_IN_HAND = 10
 
   attr_accessor :players, :started, :white_deck, :black_deck, :black_card, :discard_pile, :played_cards, :czar_order
