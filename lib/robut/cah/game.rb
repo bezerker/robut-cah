@@ -2,14 +2,19 @@ module Robut
   module Cah
     class Game
 
-      attr_accessor :players, :started, :white_deck, :black_deck, :black_card, :discard_pile, :played_cards, :czar_order
+      attr_accessor :players, :started, :white_deck, :black_deck, :black_card, :played_cards, :czar_order
 
       def initialize
-        @started = nil
         @players = {}
-        @discard_pile = []
-        @played_cards = {}
         @czar_order = []
+
+        setup
+      end
+
+      def setup
+        @started = nil
+        @played_cards = {}
+        @czar_order.shuffle!
 
         @white_deck = Deck.new(File.expand_path("../../../../cards/white.yml", __FILE__))
         @black_deck = Deck.new(File.expand_path("../../../../cards/black.yml", __FILE__))
@@ -34,7 +39,11 @@ module Robut
       end
 
       def scores
-        players.values.map {|player| "#{player.username}: #{player.score}"}
+        {}.tap do |hash|
+          players.each do |k,v|
+            hash[k] = v.score
+          end
+        end
       end
 
       def czar?(username)
@@ -87,6 +96,17 @@ module Robut
         # czar_order.shuffle
         next_round
         @started = Time.now
+      end
+
+      def restart
+        setup
+
+        # Players need new hands
+        players.keys.each do |username|
+          players[username] = Player.new(username)
+        end
+
+        start
       end
 
       def started?
