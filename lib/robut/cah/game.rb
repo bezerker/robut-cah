@@ -1,12 +1,11 @@
 module Robut
   module Cah
     class Game
-      CARDS_IN_HAND = 10
 
       attr_accessor :players, :started, :white_deck, :black_deck, :black_card, :discard_pile, :played_cards, :czar_order
 
       def initialize
-        started = Time.now
+        @started = nil
         @players = {}
         @discard_pile = []
         @played_cards = {}
@@ -17,10 +16,12 @@ module Robut
       end
 
       def join(username)
-        if !players.keys.include?(username)
-          new_player = Player.new(:username => username, :cards => white_deck.draw(CARDS_IN_HAND))
-          players[username] = new_player
-          czar_order << username
+        players.fetch(username) do
+          Player.new(username).tap do |new_player|
+            players[username] = new_player
+            czar_order << username
+            new_player.replenish(white_deck)
+          end
         end
       end
 
@@ -41,56 +42,57 @@ module Robut
       end
 
       def czar
-        czar_order.first
+        started? ? czar_order.first : nil
       end
 
-      def play_card(username, card_id)
-        if player = players[username]
-          if player.play_card(card_id)
-            played_cards[username] = card_id
-          end
+      def play_card(username, card)
+        return false if czar?(username)
+        return false if played_cards.has_key?(username)
+        if card = players.fetch(username).play_card(card)
+          played_cards[username] = card
+          true
+        else
+          false
         end
+      rescue KeyError
+        false
       end
 
       # Award black card to the chosen winner
       def choose_winner(card)
-        winner = played_cards.invert[card]
-        winner.award_card(black_card)
-        winner
+        players[played_cards.invert[card]].tap do |winner|
+          winner.award_card(black_card)
+          next_round
+        end
       end
 
       def next_round
         # Discard played white cards
-        @discard_pile += played_cards.values
+        white_deck.discard(played_cards.values)
         @played_cards = {}
 
         # Draw new white cards
         players.values.each do |player|
-          if player.cards.count < CARDS_IN_HAND
-            player.cards += white_deck.shift(CARDS_IN_HAND - player.cards.count)
-          end
+          player.replenish(white_deck)
         end
 
         # Select new card czar
-        czar_order.rotate!
+        czar_order.rotate! if started?
 
         # Draw next black card
-        @black_card = black_deck.shift unless over?
+        @black_card = black_deck.draw
       end
 
-      def over?
-        black_deck.count == 0
+      def start
+        # czar_order.shuffle
+        next_round
+        @started = Time.now
       end
 
-      protected
-
-      def white_deck
-        if @white_deck.count < 10
-          @white_deck += discard_pile.shuffle
-          discard_pile = []
-        end
-        @white_deck
+      def started?
+        !!@started
       end
+
     end
   end
 end

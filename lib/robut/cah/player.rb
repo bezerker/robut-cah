@@ -3,9 +3,9 @@ module Robut
     class Player
       attr_accessor :username, :cards, :won_cards
 
-      def initialize(params)
-        @username = params[:username]
-        @cards = params[:cards]
+      def initialize(username)
+        @username = username
+        @cards = []
         @won_cards = []
       end
 
@@ -18,7 +18,11 @@ module Robut
       end
 
       def award_card(black_card)
-        won_cards += black_card
+        @won_cards += black_card
+      end
+
+      def replenish(deck)
+        @cards += deck.draw(CARDS_IN_HAND - cards.count)
       end
     end
   end

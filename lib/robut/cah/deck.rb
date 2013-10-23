@@ -1,6 +1,11 @@
+require 'forwardable'
+
 module Robut
   module Cah
     class Deck
+      extend Forwardable
+
+      def_delegators :@unplayed, :length, :count
 
       def initialize(file_path)
         @discarded = []
