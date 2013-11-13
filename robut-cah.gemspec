@@ -5,6 +5,7 @@ Gem::Specification.new do |s|
   s.summary = 'Cards plugin for Robut'
 
   s.add_dependency "robut"
+  s.add_dependency "cah"
   s.license = "MIT"
 
   s.authors = ["Kyle Rippey", "Jeff Ching"]
