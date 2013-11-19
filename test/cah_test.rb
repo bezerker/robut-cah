@@ -31,10 +31,10 @@ class Robut::Plugin::CahTest < MiniTest::Unit::TestCase
     assert_equal ["@john You aren't currently playing."], @plugin.reply_to.replies
   end
 
-  # def test_lists_scores
-  #   @plugin.handle(Time.now, "@john", "@robut cah scores")
-  #   assert_equal ["Scores:\n"], @plugin.reply_to.replies
-  # end
+  def test_lists_scores
+    @plugin.handle(Time.now, "@john", "@robut cah scores")
+    assert_equal ["Scores:\n"], @plugin.reply_to.replies
+  end
 
   def test_lists_players
     @plugin.handle(Time.now, "@john", "@robut cah players")

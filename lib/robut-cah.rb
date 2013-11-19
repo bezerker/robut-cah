@@ -22,7 +22,8 @@ class Robut::Plugin::Cah
       
       # scores: list the current scores
       elsif phrase =~ /^scores/i
-        #reply("Scores:\n#{game.scores.join('\n')}")
+        score_strings = game.scores.map {|k,v| "#{k}: #{v}"}
+        reply("Scores:\n#{score_strings.join('\n')}")
 
       # join: join the current game
       elsif phrase =~ /^join/i
