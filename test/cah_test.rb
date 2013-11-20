@@ -13,36 +13,78 @@ class Robut::Plugin::CahTest < MiniTest::Unit::TestCase
   end
 
   def test_join_and_leave_a_game
-    @plugin.handle(Time.now, "@john", "@robut cah join")
-    assert_equal ["@john has joined the game."], @plugin.reply_to.replies
+    @plugin.handle(Time.now, "@john", "cah join")
+    assert_equal "@john has joined the game.", @plugin.reply_to.replies.last
 
-    @plugin.handle(Time.now, "@john", "@robut cah players")
+    @plugin.handle(Time.now, "@john", "cah players")
     assert_equal "Current players: @john", @plugin.reply_to.replies.last
 
-    @plugin.handle(Time.now, "@john", "@robut cah leave")
+    @plugin.handle(Time.now, "@mark", "cah join")
+    assert_equal "@mark has joined the game.", @plugin.reply_to.replies.last
+
+    @plugin.handle(Time.now, "@john", "cah players")
+    assert_equal "Current players: @john, @mark", @plugin.reply_to.replies.last
+
+    @plugin.handle(Time.now, "@john", "cah leave")
     assert_equal "@john has left the game.", @plugin.reply_to.replies.last
 
-    @plugin.handle(Time.now, "@john", "@robut cah players")
+    @plugin.handle(Time.now, "@john", "cah players")
+    assert_equal "Current players: @mark", @plugin.reply_to.replies.last
+
+    @plugin.handle(Time.now, "@mark", "cah leave")
+    assert_equal "@mark has left the game.", @plugin.reply_to.replies.last
+
+    @plugin.handle(Time.now, "@john", "cah players")
     assert_equal "Nobody is currently playing.", @plugin.reply_to.replies.last
   end
 
   def test_cannot_leave_a_game_without_joining
-    @plugin.handle(Time.now, "@john", "@robut cah leave")
+    @plugin.handle(Time.now, "@john", "cah leave")
+    assert_equal ["@john You aren't currently playing."], @plugin.reply_to.replies
+  end
+
+  def test_cannot_play_a_card_without_joining
+    @plugin.handle(Time.now, "@john", "cah play 0")
     assert_equal ["@john You aren't currently playing."], @plugin.reply_to.replies
   end
 
   def test_lists_scores
-    @plugin.handle(Time.now, "@john", "@robut cah scores")
+    @plugin.handle(Time.now, "@john", "cah scores")
     assert_equal ["Scores:\n"], @plugin.reply_to.replies
   end
 
-  def test_lists_players
-    @plugin.handle(Time.now, "@john", "@robut cah players")
-    assert_equal ["Nobody is currently playing."], @plugin.reply_to.replies
+  def test_play_a_card
+    @plugin.handle(Time.now, "@john", "cah join")
+
+    @plugin.handle(Time.now, "@john", "cah play 0")
+    assert_equal "@john played a card.", @plugin.reply_to.replies.last
   end
 
-  def test_play_a_card
-    @plugin.handle(Time.now, "@john", "@robut cah play 0")
+  def test_can_start_and_play_a_game
+    @plugin.handle(Time.now, "@john", "cah join")
+    assert_equal "@john has joined the game.", @plugin.reply_to.replies.last
+
+    @plugin.handle(Time.now, "@mark", "cah join")
+    assert_equal "@mark has joined the game.", @plugin.reply_to.replies.last
+
+    @plugin.handle(Time.now, "@john", "cah start")
+    assert_equal "@john is now the card czar.", @plugin.reply_to.replies.last.split("\n")[0]
+    
+    @plugin.handle(Time.now, "@mark", "cah cards")
+    assert_equal "Your cards:", @plugin.reply_to.replies.last.split("\n").first
+
+    @plugin.handle(Time.now, "@mark", "cah play 0")
+    assert_equal "@mark played a card.", @plugin.reply_to.replies.last
+
+    @plugin.handle(Time.now, "@john", "cah reveal")
+    assert_equal "Played cards:", @plugin.reply_to.replies.last.split("\n").first
+
+    @plugin.handle(Time.now, "@john", "cah choose 0")
+    assert_equal "@mark won the round!", @plugin.reply_to.replies.last.split("\n")[0]
+    assert_equal "@mark is now the card czar.", @plugin.reply_to.replies.last.split("\n")[1]
+
+    @plugin.handle(Time.now, "@john", "cah scores")
+    assert_equal "Scores:\n@john: 0\n@mark: 1", @plugin.reply_to.replies.last
   end
   
 end
