@@ -62,8 +62,12 @@ class Robut::Plugin::Cah
 
       # play 0-n: play a card
       elsif phrase =~ /^play ([0-9]+)/i
-        selection = $1
-        play_card(sender_nick, selection.to_i)
+        if game.czar?(sender_nick)
+          selection = $1
+          play_card(sender_nick, selection.to_i)
+        else
+          reply("The card czar may not play a card.")
+        end
 
       # reveal: czar may reveal the played cards to select a winner
       elsif phrase =~ /reveal/i
