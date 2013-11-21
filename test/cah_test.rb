@@ -53,13 +53,6 @@ class Robut::Plugin::CahTest < MiniTest::Unit::TestCase
     assert_equal ["Scores:\n"], @plugin.reply_to.replies
   end
 
-  def test_play_a_card
-    @plugin.handle(Time.now, "@john", "cah join")
-
-    @plugin.handle(Time.now, "@john", "cah play 0")
-    assert_equal "@john played a card.", @plugin.reply_to.replies.last
-  end
-
   def test_can_start_and_play_a_game
     @plugin.handle(Time.now, "@john", "cah join")
     assert_equal "@john has joined the game.", @plugin.reply_to.replies.last
@@ -75,6 +68,10 @@ class Robut::Plugin::CahTest < MiniTest::Unit::TestCase
 
     @plugin.handle(Time.now, "@mark", "cah play 0")
     assert_equal "@mark played a card.", @plugin.reply_to.replies.last
+
+    # czar may not play a card
+    @plugin.handle(Time.now, "@john", "cah play 0")
+    assert_equal "The card czar may not play a card.", @plugin.reply_to.replies.last
 
     @plugin.handle(Time.now, "@john", "cah reveal")
     assert_equal "Played cards:", @plugin.reply_to.replies.last.split("\n").first
