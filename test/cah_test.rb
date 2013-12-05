@@ -83,5 +83,12 @@ class Robut::Plugin::CahTest < MiniTest::Unit::TestCase
     @plugin.handle(Time.now, "@john", "cah scores")
     assert_equal "Scores:\n@john: 0\n@mark: 1", @plugin.reply_to.replies.last
   end
+
+  def test_random_returns_value
+    before_count = @plugin.reply_to.replies.count
+    @plugin.random
+    assert @plugin.reply_to.replies.last
+    assert before_count + 1, @plugin.reply_to.replies.count
+  end
   
 end

@@ -6,6 +6,21 @@ require 'yaml'
 class Robut::Plugin::Cah
   include Robut::Plugin
 
+  def random
+    new_game = ::Cah::Game.new
+    black_card = new_game.black_deck.draw(1).first
+    blank_count = black_card.scan("(blank)").count
+    if blank_count > 0
+      white_cards = new_game.white_deck.draw(blank_count)
+      response = black_card.gsub("(blank)", "%s") % white_cards
+    else
+      white_card = new_game.white_deck.draw(1).first
+      response = "#{black_card} #{white_card}"
+    end
+
+    reply(response)
+  end
+
   def handle(time, sender_nick, message)
     words = words(message)
 
