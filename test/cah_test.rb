@@ -39,13 +39,33 @@ class Robut::Plugin::CahTest < MiniTest::Unit::TestCase
   end
 
   def test_cannot_leave_a_game_without_joining
-    @plugin.handle(Time.now, "@john", "cah leave")
-    assert_equal ["@john You aren't currently playing."], @plugin.reply_to.replies
+    @plugin.handle(Time.now, "@john", "cah join")
+    assert_equal "@john has joined the game.", @plugin.reply_to.replies.last
+
+    @plugin.handle(Time.now, "@john", "cah start")
+    assert_equal "@john is now the card czar.", @plugin.reply_to.replies.last.split("\n")[0]
+
+    @plugin.handle(Time.now, "@mark", "cah leave")
+    assert_equal "@mark You aren't currently playing.", @plugin.reply_to.replies.last
   end
 
   def test_cannot_play_a_card_without_joining
-    @plugin.handle(Time.now, "@john", "cah play 0")
-    assert_equal ["@john You aren't currently playing."], @plugin.reply_to.replies
+    @plugin.handle(Time.now, "@john", "cah join")
+    assert_equal "@john has joined the game.", @plugin.reply_to.replies.last
+
+    @plugin.handle(Time.now, "@john", "cah start")
+    assert_equal "@john is now the card czar.", @plugin.reply_to.replies.last.split("\n")[0]
+
+    @plugin.handle(Time.now, "@mark", "cah play 0")
+    assert_equal "@mark You aren't currently playing.", @plugin.reply_to.replies.last
+  end
+
+  def test_cannot_play_a_card_before_game_has_started
+    @plugin.handle(Time.now, "@john", "cah join")
+    assert_equal "@john has joined the game.", @plugin.reply_to.replies.last
+
+    @plugin.handle(Time.now, "@john", "cah play 1")
+    assert_equal "The game has not started yet. Be patient!", @plugin.reply_to.replies.last
   end
 
   def test_lists_scores

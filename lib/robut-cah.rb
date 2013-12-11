@@ -77,25 +77,31 @@ class Robut::Plugin::Cah
 
       # play 0-n: play a card
       elsif phrase =~ /^play ([0-9]+)/i
-        if game.czar?(sender_nick)
-          reply("The card czar may not play a card.")
-        else
-          selection = $1
-          play_card(sender_nick, selection.to_i)
+        if started?
+          if game.czar?(sender_nick)
+            reply("The card czar may not play a card.")
+          else
+            selection = $1
+            play_card(sender_nick, selection.to_i)
+          end
         end
 
       # reveal: czar may reveal the played cards to select a winner
       elsif phrase =~ /reveal/i
-        if game.czar?(sender_nick)
-          reply("Played cards:\n#{game.played_cards.values.join("\n")}")
-        else
-          reply("Only the card czar (#{game.czar}) may reveal the played cards.")
+        if started?
+          if game.czar?(sender_nick)
+            reply("Played cards:\n#{game.played_cards.values.join("\n")}")
+          else
+            reply("Only the card czar (#{game.czar}) may reveal the played cards.")
+          end
         end
 
       # choose 0-n: choose a winning card (if you are the czar)
       elsif phrase =~ /^choose ([0-9]+)/i
-        chosen = $1
-        choose_winning_card(sender_nick, chosen.to_i)
+        if started?
+          chosen = $1
+          choose_winning_card(sender_nick, chosen.to_i)
+        end
       end
     end
   end
@@ -144,6 +150,12 @@ class Robut::Plugin::Cah
   def playing?(sender_nick)
     return true if game.players[sender_nick]
     reply("#{sender_nick} You aren't currently playing.")
+    false
+  end
+
+  def started?
+    return true if game.started?
+    reply("The game has not started yet. Be patient!")
     false
   end
 
